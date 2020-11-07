@@ -11,9 +11,13 @@ spring:
   application:
     name: amq-test
   activemq:
+
     broker-url: tcp://[server]:61616
     user: admin
     password: admin
+    use_tls: true
+    truststore: /certs/truststore.jks
+    truststorePassword: changeit  
   jms:
     pub-sub-domain: true
 
