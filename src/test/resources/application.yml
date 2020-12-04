@@ -1,0 +1,75 @@
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: ["health", "info", "env","bus-refresh", "refresh"]
+
+spring:
+  profiles.include: activemq
+  application:
+    name: amq-test
+
+  # Spring DB Settings
+  datasource:
+    driver-class-name: org.h2.Driver
+    # see http://www.h2database.com/html/features.html#database_url
+    url: jdbc:h2:mem:ppipoc;INIT=RUNSCRIPT FROM 'classpath:pipoc-db-schema.sql'\;RUNSCRIPT FROM 'classpath:pipoc-db-data.sql';DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: admin
+    password: admin
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        use_sql_comments: true
+        format_sql: true
+
+  # Spring JMS Settings
+  jms:
+    listener:
+      acknowledge-mode: auto
+      auto-startup: true
+      concurrency: 2
+      max-concurrency: 2
+    pub-sub-domain: false
+    template:
+      default-destination:
+      delivery-mode: non_persistent
+      priority: 100
+      qos-enabled: true
+      receive-timeout: 1000
+      time-to-live: 36000
+  activemq:
+    broker-url: vm://embedded?broker.persistent=false,useShutdownHook=false
+    non-blocking-redelivery: true
+
+  # Spring Stream Settings
+  cloud:
+    stream:
+      default-binder: test
+      bindings:
+        stream-request:
+          consumer:
+            concurrency: 2
+          destination: stream-request-exchange
+          group: test-stream-processors
+        stream-response:
+          destination: stream-response-exchange
+
+server:
+  servlet:
+    context-path: /amq
+
+debug: false
+
+# Logging configuration
+logging:
+  pattern:
+    console: "%d [%t] %-5p %c{1} - %m%n"
+  level:
+    - ".=info"
